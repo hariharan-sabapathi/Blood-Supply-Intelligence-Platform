@@ -1,4 +1,4 @@
-# Blood-Supply-Intelligence Platform
+# Blood Supply Intelligence Platform
 
 ## Overview
 
