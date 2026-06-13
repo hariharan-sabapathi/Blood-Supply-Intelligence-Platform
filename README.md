@@ -169,7 +169,7 @@ The dashboard provides real-time operational visibility through:
 ## Project Structure
 
 ```text
-real-time-blood-supply-intelligence/
+blood-supply-intelligence/
 │
 ├── simulator/
 │   └── generate_blood_events.py
