@@ -1,3 +1,4 @@
+import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 
@@ -12,13 +13,31 @@ spark = (
         "spark.sql.catalog.spark_catalog",
         "org.apache.spark.sql.delta.catalog.DeltaCatalog"
     )
+    .config(
+        "spark.hadoop.fs.s3a.impl",
+        "org.apache.hadoop.fs.s3a.S3AFileSystem"
+    )
+    .config(
+        "spark.hadoop.fs.s3a.access.key",
+        os.getenv("AWS_ACCESS_KEY_ID")
+    )
+    .config(
+        "spark.hadoop.fs.s3a.secret.key",
+        os.getenv("AWS_SECRET_ACCESS_KEY")
+    )
+    .config(
+        "spark.hadoop.fs.s3a.endpoint",
+        "s3.us-east-2.amazonaws.com"
+    )
     .getOrCreate()
 )
 
 df = (
     spark.readStream
     .format("delta")
-    .load("/data/bronze")
+    .load(
+        "s3a://blood-supply-intelligence-lakehouse/bronze"
+    )
 )
 
 silver_df = (
@@ -37,8 +56,10 @@ silver_df = (
     .outputMode("append")
     .option(
         "checkpointLocation",
-        "/data/checkpoints/silver"
+        "s3a://blood-supply-intelligence-lakehouse/checkpoints/silver"
     )
-    .start("/data/silver")
+    .start(
+        "s3a://blood-supply-intelligence-lakehouse/silver"
+    )
     .awaitTermination()
 )
