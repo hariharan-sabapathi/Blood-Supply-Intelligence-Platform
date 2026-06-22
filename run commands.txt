@@ -1,0 +1,26 @@
+docker compose down
+docker compose up -d
+
+python simulator/generate_blood_events.py
+
+docker exec -it spark bash
+
+/opt/spark/bin/spark-submit \
+--conf spark.jars.ivy=/opt/spark-apps/.ivy \
+--packages io.delta:delta-spark_2.12:3.2.0,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 \
+01_stream_blood_events_to_bronze.py
+
+
+docker exec -it spark bash
+
+/opt/spark/bin/spark-submit \
+--conf spark.jars.ivy=/opt/spark-apps/.ivy \
+--packages io.delta:delta-spark_2.12:3.2.0,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 \
+02_cleaned_values_silver.py
+
+docker exec -it spark bash
+
+/opt/spark/bin/spark-submit \
+--conf spark.jars.ivy=/opt/spark-apps/.ivy \
+--packages io.delta:delta-spark_2.12:3.2.0,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 \
+03_aggregated_to_gold.py
